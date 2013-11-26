@@ -1,9 +1,12 @@
 package de.onyxbits.listmyapps;
 
+import java.io.File;
+import java.io.FileNotFoundException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Scanner;
 
 import android.content.SharedPreferences;
 import android.content.pm.ApplicationInfo;
@@ -11,6 +14,7 @@ import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.os.AsyncTask;
+import android.support.v4.app.ListFragment;
 import android.app.ListActivity;
 
 /**
@@ -21,7 +25,7 @@ import android.app.ListActivity;
  * 
  */
 public class ListTask extends
-		AsyncTask<Object, Object, ArrayList<SortablePackageInfo>> {
+		AsyncTask<Object, Object, ArrayList<? extends SortablePackageInfoInterface>> {
 
 	private ListActivity listActivity;
 	private int layout;
@@ -40,10 +44,10 @@ public class ListTask extends
 	}
 
 	@Override
-	protected ArrayList<SortablePackageInfo> doInBackground(Object... params) {
+	protected ArrayList<SortablePackageInfoInterface> doInBackground(Object... params) {
 		SharedPreferences prefs = listActivity.getSharedPreferences(
 				MainActivity.PREFSFILE, 0);
-		ArrayList<SortablePackageInfo> ret = new ArrayList<SortablePackageInfo>();
+		ArrayList<SortablePackageInfoInterface> ret = new ArrayList<SortablePackageInfoInterface>();
 		PackageManager pm = listActivity.getPackageManager();
 		List<PackageInfo> list = pm.getInstalledPackages(0);
 		SortablePackageInfo spitmp[] = new SortablePackageInfo[list.size()];
@@ -86,6 +90,29 @@ public class ListTask extends
 					+ spi[i].packageName, false);
 			ret.add(spi[i]);
 		}
+		String filePath = prefs.getString(MainActivity.INSTALL_FILE, "");
+		if(filePath != ""){
+			File file = new File(filePath);
+			Scanner input;
+			try {
+				input = new Scanner(file);
+			while (input.hasNext()) {
+				String nextLine = input.nextLine();
+				SortablePackageInfoNotInstalled spiNotInst = new SortablePackageInfoNotInstalled();
+				spiNotInst.installer = nextLine;
+				spiNotInst.packageName = nextLine.replace("market://details?id=", "");
+				spiNotInst.icon = listActivity.getResources().getDrawable(android.R.drawable.ic_input_get);
+				
+				if(!ret.contains(spiNotInst)){
+					spiNotInst.comment = listActivity.getString(R.string.not_installed);
+					ret.add(0, spiNotInst);
+				}
+			}
+
+			} catch (FileNotFoundException e) {
+				e.printStackTrace();
+			}
+		}
 		return ret;
 	}
 	
@@ -96,7 +123,7 @@ public class ListTask extends
 	}
 
 	@Override
-	protected void onPostExecute(ArrayList<SortablePackageInfo> result) {
+	protected void onPostExecute(ArrayList<? extends SortablePackageInfoInterface> result) {
 		super.onPostExecute(result);
 		listActivity.setListAdapter(new AppAdapter(listActivity, layout, result,
 				layout));

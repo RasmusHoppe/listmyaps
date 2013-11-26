@@ -32,5 +32,7 @@
 		android:icon="@drawable/ic_action_templates"
 		android:title="@string/edit_templates">
 	</item>
-
+<item
+    android:id="@+id/install_apps"
+    android:title="@string/menu_install"></item>
 </menu>

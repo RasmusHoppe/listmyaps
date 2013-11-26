@@ -37,21 +37,25 @@ public class AnnotationsActivity extends ListActivity implements
 		annotationsSource = new AnnotationsSource(this);
 		annotationsSource.open();
 		setListAdapter(new AppAdapter(this, R.layout.app_item_annotation,
-				new ArrayList<SortablePackageInfo>(), R.layout.app_item_annotation));
+				new ArrayList<SortablePackageInfo>(),
+				R.layout.app_item_annotation));
 		new ListTask(this, R.layout.app_item_annotation).execute("");
 	}
 
 	@Override
 	public void onListItemClick(ListView l, View v, int pos, long id) {
 		AppAdapter aa = (AppAdapter) getListAdapter();
-		spi = aa.getItem(pos);
-		AlertDialog.Builder builder = new AlertDialog.Builder(this);
-		comment = new EditText(this);
-		comment.setHint(R.string.hint_my_notes);
-		comment.setText(MainActivity.noNull(spi.comment));
-		builder.setTitle(spi.displayName).setView(comment).setIcon(spi.icon)
-				.setPositiveButton(R.string.btn_save, this)
-				.setNegativeButton(R.string.btn_cancel, this).show();
+		if (aa.getItem(pos).installed()) {
+			spi = (SortablePackageInfo) aa.getItem(pos);
+			AlertDialog.Builder builder = new AlertDialog.Builder(this);
+			comment = new EditText(this);
+			comment.setHint(R.string.hint_my_notes);
+			comment.setText(MainActivity.noNull(spi.comment));
+			builder.setTitle(spi.displayName).setView(comment)
+					.setIcon(spi.icon)
+					.setPositiveButton(R.string.btn_save, this)
+					.setNegativeButton(R.string.btn_cancel, this).show();
+		}
 	}
 
 	@Override
@@ -62,33 +66,38 @@ public class AnnotationsActivity extends ListActivity implements
 			((AppAdapter) getListAdapter()).notifyDataSetChanged();
 		}
 	}
-	
+
 	@Override
 	public boolean onItemLongClick(AdapterView<?> parent, View view,
 			int position, long id) {
 		AppAdapter aa = (AppAdapter) getListAdapter();
-		SortablePackageInfo spi = aa.getItem(position);
-		View content = getLayoutInflater().inflate(R.layout.details, null);
-		ScrollView scrollView = new ScrollView(this);
-		scrollView.addView(content);
+		if (aa.getItem(position).installed()) {
+			SortablePackageInfo spi = (SortablePackageInfo) aa
+					.getItem(position);
+			View content = getLayoutInflater().inflate(R.layout.details, null);
+			ScrollView scrollView = new ScrollView(this);
+			scrollView.addView(content);
 
-		DateFormat df = DateFormat.getDateTimeInstance();
-		((TextView) content.findViewById(R.id.lbl_val_version))
-				.setText(spi.version);
-		((TextView) content.findViewById(R.id.lbl_val_versioncode)).setText(""
-				+ spi.versionCode);
-		((TextView) content.findViewById(R.id.lbl_val_installed)).setText(df
-				.format(new Date(spi.firstInstalled)));
-		((TextView) content.findViewById(R.id.lbl_val_updated)).setText(df
-				.format(new Date(spi.lastUpdated)));
-		((TextView) content.findViewById(R.id.lbl_val_uid)).setText("" + spi.uid);
-		((TextView) content.findViewById(R.id.lbl_val_datadir))
-				.setText(spi.dataDir);
+			DateFormat df = DateFormat.getDateTimeInstance();
+			((TextView) content.findViewById(R.id.lbl_val_version))
+					.setText(spi.version);
+			((TextView) content.findViewById(R.id.lbl_val_versioncode))
+					.setText("" + spi.versionCode);
+			((TextView) content.findViewById(R.id.lbl_val_installed))
+					.setText(df.format(new Date(spi.firstInstalled)));
+			((TextView) content.findViewById(R.id.lbl_val_updated)).setText(df
+					.format(new Date(spi.lastUpdated)));
+			((TextView) content.findViewById(R.id.lbl_val_uid)).setText(""
+					+ spi.uid);
+			((TextView) content.findViewById(R.id.lbl_val_datadir))
+					.setText(spi.dataDir);
 
-		AlertDialog.Builder builder = new AlertDialog.Builder(this);
-		builder.setTitle(spi.displayName).setIcon(spi.icon).setView(scrollView)
-				.setNegativeButton(null, null).setPositiveButton(null, null)
-				.setNeutralButton(null, null).show();
+			AlertDialog.Builder builder = new AlertDialog.Builder(this);
+			builder.setTitle(spi.displayName).setIcon(spi.icon)
+					.setView(scrollView).setNegativeButton(null, null)
+					.setPositiveButton(null, null).setNeutralButton(null, null)
+					.show();
+		}
 		return true;
 	}
 }

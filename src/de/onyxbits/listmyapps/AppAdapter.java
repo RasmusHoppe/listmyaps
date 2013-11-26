@@ -8,7 +8,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.CheckBox;
-import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -18,31 +17,35 @@ import android.widget.TextView;
  * @author patrick
  * 
  */
-public class AppAdapter extends ArrayAdapter<SortablePackageInfo> {
+public class AppAdapter extends ArrayAdapter<SortablePackageInfoInterface> {
 
 	private int layout;
 
 	public AppAdapter(Context context, int textViewResourceId,
-			List<SortablePackageInfo> spi, int layout) {
-		super(context, textViewResourceId, spi);
+			List<? extends SortablePackageInfoInterface> spi, int layout) {
+		super(context, textViewResourceId,
+				(List<SortablePackageInfoInterface>) spi);
 		this.layout = layout;
 	}
 
 	@Override
 	public View getView(int position, View convertView, ViewGroup parent) {
 		View ret = convertView;
-		if (ret == null) {
-			LayoutInflater inflater = (LayoutInflater) getContext().getSystemService(
-					Context.LAYOUT_INFLATER_SERVICE);
+		LayoutInflater inflater = (LayoutInflater) getContext()
+				.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+
+		if (getItem(position).installed()) {
 			ret = inflater.inflate(layout, null);
-		}
-		SortablePackageInfo spi = getItem(position);
+			SortablePackageInfo spi = (SortablePackageInfo) getItem(position);
 
-		((TextView) ret.findViewById(R.id.appname)).setText(spi.displayName);
-		((TextView) ret.findViewById(R.id.apppackage)).setText(spi.packageName);
-		((ImageView) ret.findViewById(R.id.icon)).setImageDrawable(spi.icon);
+			((TextView) ret.findViewById(R.id.appname))
+					.setText(spi.displayName);
+			((TextView) ret.findViewById(R.id.apppackage))
+					.setText(spi.packageName);
+			((ImageView) ret.findViewById(R.id.icon))
+					.setImageDrawable(spi.icon);
 
-		switch (layout) {
+			switch (layout) {
 			case R.layout.app_item: {
 				CheckBox sel = ((CheckBox) ret.findViewById(R.id.selected));
 				sel.setChecked(spi.selected);
@@ -50,10 +53,22 @@ public class AppAdapter extends ArrayAdapter<SortablePackageInfo> {
 				break;
 			}
 			case R.layout.app_item_annotation: {
-				((TextView) ret.findViewById(R.id.comments)).setText(MainActivity
-						.noNull(spi.comment));
+				((TextView) ret.findViewById(R.id.comments))
+						.setText(MainActivity.noNull(spi.comment));
 			}
+			}
+		} else {
+			ret = inflater.inflate(R.layout.app_item_not_installed, null);
+			SortablePackageInfoNotInstalled spi = (SortablePackageInfoNotInstalled) getItem(position);
+
+			((TextView) ret.findViewById(R.id.apppackage))
+					.setText(spi.packageName);
+			((TextView) ret.findViewById(R.id.message)).setText(spi.comment);
+			((ImageView) ret.findViewById(R.id.icon))
+					.setImageDrawable(spi.icon);
+			ret.setOnClickListener(spi);
 		}
+
 		return ret;
 	}
 

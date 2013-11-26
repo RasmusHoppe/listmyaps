@@ -58,5 +58,7 @@
 	<string name="btn_save">Save</string>
 	<string name="btn_cancel">Cancel</string>
 	
-
+	
+	<string name="menu_install">Load File</string>
+	<string name="not_installed">Click to install app</string>
 </resources>

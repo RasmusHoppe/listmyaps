@@ -9,13 +9,12 @@ import android.widget.CheckBox;
  * @author patrick
  * 
  */
-class SortablePackageInfo implements Comparable<SortablePackageInfo>,
+class SortablePackageInfo implements SortablePackageInfoInterface, Comparable<SortablePackageInfoInterface>,
 		View.OnClickListener {
 
 	/**
 	 * Maximum items per category (for sorting)
 	 */
-	public static final int MAXCATEGORY=10000;
 	
 	public String packageName;
 	public String displayName;
@@ -35,13 +34,38 @@ class SortablePackageInfo implements Comparable<SortablePackageInfo>,
 	public SortablePackageInfo(){}
 
 	@Override
-	public int compareTo(SortablePackageInfo another) {
-		return MAXCATEGORY*category+ displayName.compareTo(another.displayName);
+	public int compareTo(SortablePackageInfoInterface another) {
+		return MAXCATEGORY*category+ displayName.compareTo(another.getDisplayName());
 	}
 
 	@Override
 	public void onClick(View v) {
 		selected = ((CheckBox) v).isChecked();
+	}
+
+	@Override
+	public boolean installed() {
+		return true;
+	}
+
+	@Override
+	public String getDisplayName() {
+		return displayName;
+	}
+
+	@Override
+	public boolean equals(Object o) {
+		if(((SortablePackageInfoInterface) o).installed()){
+			SortablePackageInfo _spi =	(SortablePackageInfo)o;
+			if(this.packageName.equals( _spi.packageName))
+				return true;
+		} else {
+			SortablePackageInfoNotInstalled _spi = (SortablePackageInfoNotInstalled)o;
+			if (this.packageName.equals(  _spi.packageName)) {
+				return true;
+			}
+		}
+		return false;
 	}
 
 }
