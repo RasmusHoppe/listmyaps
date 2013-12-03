@@ -22,7 +22,10 @@ class SortablePackageInfoNotInstalled implements SortablePackageInfoInterface, C
 	public Drawable icon;
 	public String comment;
 
-	public SortablePackageInfoNotInstalled(){}
+	public SortablePackageInfoNotInstalled(String packageName){
+		this.packageName = packageName;
+		this.installer = "market://details?id=" + packageName;
+	}
 	
 	@Override
 	public boolean equals(Object o) {

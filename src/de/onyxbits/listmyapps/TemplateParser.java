@@ -61,9 +61,6 @@ public class TemplateParser {
 	private SortablePackageInfoNotInstalled parseSpiFromString(String search_string){
 		String empty_string = search_string.replaceFirst("[[\\w\\.-]+\\.[\\w\\.-]+]+", "");
 		String package_name = search_string.substring(0, search_string.length() - empty_string.length());
-		
-		SortablePackageInfoNotInstalled spi = new SortablePackageInfoNotInstalled();
-		spi.packageName = package_name;
-		return spi;
+		return new SortablePackageInfoNotInstalled(package_name);
 	}
 }
