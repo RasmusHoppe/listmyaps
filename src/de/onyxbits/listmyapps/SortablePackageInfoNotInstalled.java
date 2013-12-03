@@ -19,7 +19,6 @@ class SortablePackageInfoNotInstalled implements SortablePackageInfoInterface, C
 	
 	public String packageName;
 	public String installer;
-	public Drawable icon;
 	public String comment;
 
 	public SortablePackageInfoNotInstalled(String packageName){

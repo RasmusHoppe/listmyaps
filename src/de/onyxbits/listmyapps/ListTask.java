@@ -25,7 +25,7 @@ import android.widget.Toast;
  */
 public class ListTask
 		extends
-		AsyncTask<Object, Object, ArrayList<? extends SortablePackageInfoInterface>> {
+		AsyncTask<Object, Object, ArrayList<SortablePackageInfoInterface>> {
 
 	private ListActivity listActivity;
 	private int layout;
@@ -91,6 +91,21 @@ public class ListTask
 					+ spi[i].packageName, false);
 			ret.add(spi[i]);
 		}
+		return ret;
+	}
+
+	@Override
+	protected void onPreExecute() {
+		listActivity.setProgressBarIndeterminate(true);
+		listActivity.setProgressBarVisibility(true);
+	}
+
+	@Override
+	protected void onPostExecute(
+			ArrayList<SortablePackageInfoInterface> result) {
+		super.onPostExecute(result);
+		SharedPreferences prefs = listActivity.getSharedPreferences(
+				MainActivity.PREFSFILE, 0);
 		String filePath = prefs.getString(MainActivity.INSTALL_FILE, "");
 		if (filePath != "") {
 			File file = new File(filePath);
@@ -106,26 +121,14 @@ public class ListTask
 			}
 			for (SortablePackageInfoNotInstalled spiNotInst : spiNotInstList) {
 
-				if (!ret.contains(spiNotInst)) {
+				if (!result.contains(spiNotInst)) {
 					spiNotInst.comment = listActivity
 							.getString(R.string.not_installed);
-					ret.add(0, spiNotInst);
+					result.add(0, spiNotInst);
 				}
 			}
 		}
-		return ret;
-	}
-
-	@Override
-	protected void onPreExecute() {
-		listActivity.setProgressBarIndeterminate(true);
-		listActivity.setProgressBarVisibility(true);
-	}
-
-	@Override
-	protected void onPostExecute(
-			ArrayList<? extends SortablePackageInfoInterface> result) {
-		super.onPostExecute(result);
+		
 		listActivity.setListAdapter(new AppAdapter(listActivity, layout,
 				result, layout));
 		listActivity.setProgressBarIndeterminate(false);

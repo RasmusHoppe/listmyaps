@@ -65,7 +65,7 @@ public class AppAdapter extends ArrayAdapter<SortablePackageInfoInterface> {
 					.setText(spi.packageName);
 			((TextView) ret.findViewById(R.id.message)).setText(spi.comment);
 			((ImageView) ret.findViewById(R.id.icon))
-					.setImageDrawable(spi.icon);
+					.setImageResource(R.drawable.ic_action_add_to_queue);
 			ret.setOnClickListener(spi);
 		}
 
