@@ -12,73 +12,58 @@ import android.util.Log;
 
 public class TemplateParser {
 
-	private Context ctx;
-	private TemplateSource tmpSource;
+	private List<SortablePackageInfoNotInstalled> spiList =  new ArrayList<SortablePackageInfoNotInstalled>();
 	private String fileStr;
-	private TemplateData tmpData;
 
-	public TemplateParser(Context ctx) {
-		this.ctx = ctx;
-		tmpSource = new TemplateSource(ctx);
-		tmpSource.open();
+	public List<SortablePackageInfoNotInstalled> setFile(File f) throws FileNotFoundException {
+			Scanner s = new Scanner(f);
+			String google_search = "https://www.google.com/search?q=";
+			String google_play = "https://play.google.com/store/apps/details?id=";
+			String google_market = "market://details?id=";
+			String fdroid = "https://f-droid.org/repository/browse/?fdid=";
+			String amazon = "http://www.amazon.com/gp/mas/dl/android?p=";
+            while (s.hasNext()) {
+            	String current_string = s.next();
+            	if(current_string.indexOf(google_search) >= 0)
+            	{
+            		int stringCnt = current_string.indexOf(google_search);
+            		stringCnt += google_search.length();
+            		spiList.add(parseSpiFromString(current_string.substring(stringCnt)));
+            	} 
+            	else if(current_string.indexOf(google_play) >= 0)
+            	{
+            		int stringCnt = current_string.indexOf(google_play);
+            		stringCnt += google_play.length();
+            		spiList.add(parseSpiFromString(current_string.substring(stringCnt)));
+            	}
+            	else if(current_string.indexOf(google_market) >= 0)
+            	{
+            		int stringCnt = current_string.indexOf(google_market);
+            		stringCnt += google_market.length();
+            		spiList.add(parseSpiFromString(current_string.substring(stringCnt)));
+            	}
+            	else if(current_string.indexOf(fdroid) >= 0)
+            	{
+            		int stringCnt = current_string.indexOf(fdroid);
+            		stringCnt += fdroid.length();
+            		spiList.add(parseSpiFromString(current_string.substring(stringCnt)));
+            	}
+            	else if(current_string.indexOf(amazon) >= 0)
+            	{
+            		int stringCnt = current_string.indexOf(amazon);
+            		stringCnt += amazon.length();
+            		spiList.add(parseSpiFromString(current_string.substring(stringCnt)));
+            	}
+            }
+            return spiList;
 	}
-
-	public TemplateData getTemplateData(File f) {
-		List<TemplateData> tmpList = tmpSource.list();
-		Scanner s;
-		tmpData = null;
-
-		try {
-			s = new Scanner(f);
-			fileStr = "";
-			while (s.hasNext()) {
-				fileStr += s.nextLine();
-			}
-			for (TemplateData td : tmpList) {
-				String pattern = td.item.replace("*", ".")
-						.replace("\"", "\\\"").replace("\n", "")
-						.replace("\t", "").replace("${comment}", ")(.*)(")
-						.replace("${packagename}", ")(.*)(")
-						.replace("${displayname}", ")(.*)(")
-						.replace("${source}", ")(.*)(")
-						.replace("${versioncode}", ")(.*)(")
-						.replace("${version}", ")(.*)(")
-						.replace("${rating}", ")(.*)(")
-						.replace("${uid}", ")(.*)(")
-						.replace("${firstinstalled}", ")(.*)(")
-						.replace("${lastupdated}", ")(.*)(")
-						.replace("${datadir}", ")(.*)(")
-						.replace("${marketid}", ")(.*)(");
-
-				pattern = "(" + pattern + ")";
-				pattern = pattern.replace("()", "");
-
-				Pattern p = Pattern.compile(pattern);
-
-				Log.d("TEMPLATE Input", td.item);
-				Log.d("TEMPLATE PARSER", p.pattern());
-				if (p.matcher(" ").find()) {
-					tmpData = td;
-				} else if (p.matcher(fileStr).find()) {
-					Log.d("TEMPLATE PARSER", "WIN");
-					tmpData = td;
-					return td;
-				}
-
-			}
-		} catch (FileNotFoundException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		return tmpData;
-	}
-
-	public TemplateData getTemplateData() {
-		return tmpData;
-	}
-
-	public List<SortablePackageInfoNotInstalled> getList() {
-		List<SortablePackageInfoNotInstalled> spiList = new ArrayList<SortablePackageInfoNotInstalled>();
-		return spiList;
+	
+	private SortablePackageInfoNotInstalled parseSpiFromString(String search_string){
+		String empty_string = search_string.replaceFirst("[[\\w\\.-]+\\.[\\w\\.-]+]+", "");
+		String package_name = search_string.substring(0, search_string.length() - empty_string.length());
+		
+		SortablePackageInfoNotInstalled spi = new SortablePackageInfoNotInstalled();
+		spi.packageName = package_name;
+		return spi;
 	}
 }

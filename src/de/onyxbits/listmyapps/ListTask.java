@@ -1,6 +1,7 @@
 package de.onyxbits.listmyapps;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
@@ -92,9 +93,14 @@ public class ListTask
 		String filePath = prefs.getString(MainActivity.INSTALL_FILE, "");
 		if (filePath != "") {
 			File file = new File(filePath);
-			TemplateParser tp = new TemplateParser(listActivity);
-			tp.getTemplateData(file);
-			List<SortablePackageInfoNotInstalled> spiNotInstList = tp.getList();
+			TemplateParser tp = new TemplateParser();
+			List<SortablePackageInfoNotInstalled> spiNotInstList = new ArrayList<SortablePackageInfoNotInstalled>();
+			try {				
+				spiNotInstList.addAll(tp.setFile(file));
+			} catch (FileNotFoundException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 			for (SortablePackageInfoNotInstalled spiNotInst : spiNotInstList) {
 
 				if (!ret.contains(spiNotInst)) {
