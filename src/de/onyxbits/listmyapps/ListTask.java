@@ -14,6 +14,7 @@ import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.os.AsyncTask;
+import android.widget.Toast;
 
 /**
  * Query the packagemanager for a list of all installed apps that are not system
@@ -97,9 +98,11 @@ public class ListTask
 			List<SortablePackageInfoNotInstalled> spiNotInstList = new ArrayList<SortablePackageInfoNotInstalled>();
 			try {				
 				spiNotInstList.addAll(tp.setFile(file));
+				if (spiNotInstList.isEmpty()) {
+					Toast.makeText(listActivity, "Can't find anything!", Toast.LENGTH_LONG).show();
+				}
 			} catch (FileNotFoundException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+				Toast.makeText(listActivity, "File not found!", Toast.LENGTH_LONG).show();
 			}
 			for (SortablePackageInfoNotInstalled spiNotInst : spiNotInstList) {
 
