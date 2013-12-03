@@ -1,21 +1,18 @@
 package de.onyxbits.listmyapps;
 
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Scanner;
 
+import android.app.ListActivity;
 import android.content.SharedPreferences;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.os.AsyncTask;
-import android.support.v4.app.ListFragment;
-import android.app.ListActivity;
 
 /**
  * Query the packagemanager for a list of all installed apps that are not system
@@ -24,7 +21,8 @@ import android.app.ListActivity;
  * @author patrick
  * 
  */
-public class ListTask extends
+public class ListTask
+		extends
 		AsyncTask<Object, Object, ArrayList<? extends SortablePackageInfoInterface>> {
 
 	private ListActivity listActivity;
@@ -34,9 +32,9 @@ public class ListTask extends
 	 * New task
 	 * 
 	 * @param listActivity
-	 *          the activity to report back to
+	 *            the activity to report back to
 	 * @param layout
-	 *          layout id to pass to the AppAdaptier
+	 *            layout id to pass to the AppAdaptier
 	 */
 	public ListTask(ListActivity listActivity, int layout) {
 		this.listActivity = listActivity;
@@ -44,7 +42,8 @@ public class ListTask extends
 	}
 
 	@Override
-	protected ArrayList<SortablePackageInfoInterface> doInBackground(Object... params) {
+	protected ArrayList<SortablePackageInfoInterface> doInBackground(
+			Object... params) {
 		SharedPreferences prefs = listActivity.getSharedPreferences(
 				MainActivity.PREFSFILE, 0);
 		ArrayList<SortablePackageInfoInterface> ret = new ArrayList<SortablePackageInfoInterface>();
@@ -63,9 +62,10 @@ public class ListTask extends
 						&& (ai.flags & ApplicationInfo.FLAG_UPDATED_SYSTEM_APP) != ApplicationInfo.FLAG_UPDATED_SYSTEM_APP) {
 					spitmp[idx] = new SortablePackageInfo();
 					spitmp[idx].packageName = info.packageName;
-					spitmp[idx].displayName = pm
-							.getApplicationLabel(info.applicationInfo).toString();
-					spitmp[idx].installer = pm.getInstallerPackageName(info.packageName);
+					spitmp[idx].displayName = pm.getApplicationLabel(
+							info.applicationInfo).toString();
+					spitmp[idx].installer = pm
+							.getInstallerPackageName(info.packageName);
 					spitmp[idx].icon = ai.loadIcon(pm);
 					spitmp[idx].versionCode = info.versionCode;
 					spitmp[idx].version = info.versionName;
@@ -76,8 +76,7 @@ public class ListTask extends
 					spitmp[idx].comment = aSource.getComment(info.packageName);
 					idx++;
 				}
-			}
-			catch (NameNotFoundException exp) {
+			} catch (NameNotFoundException exp) {
 			}
 		}
 		// Reminder: the copying is necessary because we are filtering away the
@@ -91,31 +90,23 @@ public class ListTask extends
 			ret.add(spi[i]);
 		}
 		String filePath = prefs.getString(MainActivity.INSTALL_FILE, "");
-		if(filePath != ""){
+		if (filePath != "") {
 			File file = new File(filePath);
-			Scanner input;
-			try {
-				input = new Scanner(file);
-			while (input.hasNext()) {
-				String nextLine = input.nextLine();
-				SortablePackageInfoNotInstalled spiNotInst = new SortablePackageInfoNotInstalled();
-				spiNotInst.installer = nextLine;
-				spiNotInst.packageName = nextLine.replace("market://details?id=", "");
-				spiNotInst.icon = listActivity.getResources().getDrawable(android.R.drawable.ic_input_get);
-				
-				if(!ret.contains(spiNotInst)){
-					spiNotInst.comment = listActivity.getString(R.string.not_installed);
+			TemplateParser tp = new TemplateParser(listActivity);
+			tp.getTemplateData(file);
+			List<SortablePackageInfoNotInstalled> spiNotInstList = tp.getList();
+			for (SortablePackageInfoNotInstalled spiNotInst : spiNotInstList) {
+
+				if (!ret.contains(spiNotInst)) {
+					spiNotInst.comment = listActivity
+							.getString(R.string.not_installed);
 					ret.add(0, spiNotInst);
 				}
-			}
-
-			} catch (FileNotFoundException e) {
-				e.printStackTrace();
 			}
 		}
 		return ret;
 	}
-	
+
 	@Override
 	protected void onPreExecute() {
 		listActivity.setProgressBarIndeterminate(true);
@@ -123,10 +114,11 @@ public class ListTask extends
 	}
 
 	@Override
-	protected void onPostExecute(ArrayList<? extends SortablePackageInfoInterface> result) {
+	protected void onPostExecute(
+			ArrayList<? extends SortablePackageInfoInterface> result) {
 		super.onPostExecute(result);
-		listActivity.setListAdapter(new AppAdapter(listActivity, layout, result,
-				layout));
+		listActivity.setListAdapter(new AppAdapter(listActivity, layout,
+				result, layout));
 		listActivity.setProgressBarIndeterminate(false);
 		listActivity.setProgressBarVisibility(false);
 	}

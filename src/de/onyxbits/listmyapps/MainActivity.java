@@ -1,6 +1,5 @@
 package de.onyxbits.listmyapps;
 
-import java.io.File;
 import java.net.URISyntaxException;
 import java.sql.Date;
 import java.text.DateFormat;
